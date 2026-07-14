@@ -20,9 +20,13 @@ test("dashboard opening is opt-in and the tool result exposes a clickable compac
   });
   assert.equal(result.structuredContent.url, "http://127.0.0.1:43125/?compact=1");
   assert.equal(result.structuredContent.opened, false);
+  assert.equal(result.structuredContent.recommended_surface, "codex_in_app_browser");
+  assert.equal(result.structuredContent.skill_invocation, "/ → Skills → Thread Shelf");
+  assert.equal(result.structuredContent.slash_skill_picker, true);
+  assert.equal(result.structuredContent.custom_slash_command, false);
   assert.equal(result.structuredContent.in_app_browser_scope, "current_task_only");
-  assert.match(result.content[0].text, /\[打开紧凑版 Dashboard\]\(http:\/\/127\.0\.0\.1:43125\/\?compact=1\)/);
-  assert.match(result.content[0].text, /Chrome、Edge 或 Safari/);
+  assert.match(result.content[0].text, /\[在当前任务的内置浏览器打开\]\(http:\/\/127\.0\.0\.1:43125\/\?compact=1\)/);
+  assert.match(result.content[0].text, /@Thread Shelf/);
 });
 
 test("web assets expose a query-activated compact mode without hiding bookmark actions", () => {
@@ -31,6 +35,7 @@ test("web assets expose a query-activated compact mode without hiding bookmark a
   const styles = readFileSync(new URL("../web/styles.css", import.meta.url), "utf8");
   assert.match(html, /id="view-mode"/);
   assert.match(html, /id="open-system-browser"/);
+  assert.match(html, /当前 Codex 任务的内置浏览器/);
   assert.match(script, /get\("compact"\) === "1"/);
   assert.match(styles, /html\.compact-mode/);
   assert.match(styles, /\.compact-mode \.bookmark-actions \.item-button:nth-child\(2\) \{ display: grid; \}/);

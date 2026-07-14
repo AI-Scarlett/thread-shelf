@@ -69,8 +69,8 @@ for (const [name, reveal] of [["bookmark_open", false], ["bookmark_reveal", true
 
 server.registerTool("bookmark_dashboard", {
   title: "Show Thread Shelf dashboard",
-  description: "Bind the local dashboard to this Codex task and return a clickable compact localhost URL.",
-  inputSchema: { ...threadField, open: z.boolean().optional().describe("Open the compact dashboard in the system default browser; defaults to false") },
+  description: "Bind the local dashboard to this Codex task and return a compact localhost URL for the Codex built-in browser.",
+  inputSchema: { ...threadField, open: z.boolean().optional().describe("Optionally open in the system default browser; leave false for the Codex built-in browser") },
   annotations: { readOnlyHint: false, openWorldHint: true, destructiveHint: false },
 }, withThread((input, key) => {
   if (!dashboard) throw new Error("The local Thread Shelf dashboard is not available");

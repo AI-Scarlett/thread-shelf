@@ -2,7 +2,7 @@
 
 Thread Shelf 是一个纯本地、跨平台的 Codex 插件，用来保存某个 Codex 任务里值得以后再打开的文件、目录、图片、HTML 和网址。
 
-它的点击式界面是本机浏览器 Dashboard；适合窄窗口的入口是：
+它的点击式界面是本机浏览器 Dashboard，默认直接放在当前任务的 Codex 内置浏览器中；适合窄窗口的入口是：
 
 ```text
 http://127.0.0.1:43125/?compact=1
@@ -10,15 +10,23 @@ http://127.0.0.1:43125/?compact=1
 
 支持 macOS、Windows 和 Linux（Node.js 22+）。不需要 Apps SDK App、`plugin_asdk_app...`、ChatGPT Developer Mode、公网服务器、HTTPS 隧道或额外的原生应用。Dashboard 和 SQLite 数据都只在本机运行。
 
+## 在当前任务中打开
+
+安装并启用插件后，在当前 Codex 任务的聊天框中：
+
+1. 输入 `@` 并选择 **Thread Shelf**；也可以输入 `/`，在 **Skills** 分组中找到并选择 Thread Shelf。
+2. 直接发送插件或技能 mention，不必再输入“打开收藏栏”。Thread Shelf 会把无附加指令的调用视为打开当前任务收藏栏。
+3. 插件会绑定当前任务，并在 Browser 能力可用时直接导航；否则返回 [在内置浏览器打开](http://127.0.0.1:43125/?compact=1)，点击后页面就在这个任务的内置浏览器中显示。
+
+`/` 入口是在 Skills 分组中选择技能，不代表存在一个固定的 `/thread-shelf` 命令。聊天框的 `+` 是文件、图片等附件入口，不是插件选择器。
+
+切换到另一个任务后，在新任务里再次选择一次 `@Thread Shelf`。内置浏览器标签页本来就按任务隔离，因此每个任务会打开与自己绑定的收藏栏，不需要复制或手输网址。
+
+只有希望“一个标签页跨所有任务常驻”时，才点击页面里的“跨任务固定到系统浏览器”，把它固定在 Chrome、Edge 或 Safari。外部浏览器是可选模式，不是插件的必需部分。
+
+`Cmd/Ctrl+Shift+B` 可以随时显示或隐藏当前任务的内置浏览器区域。
+
 ## 怎么收藏
-
-安装并启用插件后，在浏览器打开 [Thread Shelf 紧凑版](http://127.0.0.1:43125/?compact=1)：
-
-最省事的做法是在日常使用的 Chrome、Edge 或 Safari 中固定这一个标签页。页面会通过 Hook 自动跟随当前 Codex 任务，不必为每个任务重新开一个网址。
-
-如果现在是在 Codex 内置浏览器中查看，点击页面提示条里的“在系统浏览器打开”，再把新打开的普通浏览器标签页固定即可。这是一次性操作。
-
-Codex 内置浏览器也能打开这个地址，但它的标签页按任务隔离，切换任务后不会跨任务保留。`Cmd/Ctrl+Shift+B` 只能显示或隐藏当前任务的内置浏览器区域。
 
 1. 顶部确认或切换当前 Codex 任务。
 2. 在“候选产物”中点击 `☆`，一键收藏 Codex 回复里识别到的文件和网址。
@@ -41,7 +49,7 @@ Codex plugin
 浏览器 → http://127.0.0.1:43125 → 本机 API → SQLite / 本机文件
 ```
 
-- 插件 MCP 加载后会启动 Dashboard 服务，但不会擅自打开浏览器；`bookmark_dashboard` 默认只返回可点击的紧凑版地址。
+- 插件 MCP 加载后会启动 Dashboard 服务；`bookmark_dashboard` 绑定当前任务并返回适合 Codex 内置浏览器的可点击紧凑版地址，不会擅自启动外部浏览器。
 - `SessionStart` 和 `UserPromptSubmit` Hook 会更新当前任务。
 - Dashboard 在页面可见时会跟随 Hook 更新，也有任务下拉框可手动切换。
 - “跳回 Codex”使用该任务的 `codex://threads/<id>` 链接。
@@ -82,7 +90,7 @@ npm run dashboard
 
 ## Codex 宿主边界
 
-普通 Codex 插件目前不能向 Codex 原生右键菜单、内置浏览器工具栏或右侧栏注入“收藏”按钮。因此 Thread Shelf 提供适合窄窗口的 localhost Dashboard，而不是宿主原生侧栏、Apps SDK Widget 或系统菜单栏应用。紧凑版只是页面布局，不代表它被固定进 Codex；跨任务免重开的可靠方式是固定一个普通浏览器标签页。
+普通 Codex 插件目前不能向 Codex 原生右键菜单、内置浏览器工具栏或右侧栏注入“收藏”按钮。因此 Thread Shelf 通过聊天框里的 `@Thread Shelf` 唤醒，再把适合窄窗口的 localhost Dashboard 打开到当前任务的内置浏览器。紧凑版仍是网页而不是宿主原生侧栏；系统浏览器仅作为可选的跨任务常驻模式。
 
 ## 开发验证
 

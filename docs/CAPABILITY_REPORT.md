@@ -12,7 +12,8 @@ Thread Shelf 是一个跨平台、纯本地的 Codex 插件。它把点击式 UI
 - 只监听 loopback 的 localhost Dashboard；默认端口 `43125`，支持固定端口覆盖。
 - 当前任务下拉选择、刷新和 `codex://threads/<id>` 跳转。
 - `?compact=1` 紧凑布局，适配窄浏览器窗口并保留收藏、打开、定位、移除等操作。
-- `bookmark_dashboard` 默认只返回紧凑版可点击链接；只有显式 `open: true` 才打开系统默认浏览器。
+- 通过聊天框 `@Thread Shelf` 唤醒插件；`bookmark_dashboard` 绑定当前任务并返回供 Codex 内置浏览器使用的紧凑版可点击链接。
+- Browser 能力可用时可以直接导航到本地页面；否则用户点击返回的链接。只有显式 `open: true` 才打开可选的系统默认浏览器。
 - 页面可见时自动轮询当前任务、候选与收藏，页面隐藏时暂停。
 - 从 Codex 回复中发现本机文件、目录和 HTTP(S) 网址候选。
 - 候选项星标一键收藏。
@@ -46,7 +47,9 @@ Thread Shelf 是一个跨平台、纯本地的 Codex 插件。它把点击式 UI
 
 Codex 普通插件没有面向第三方的原生右键菜单、内置浏览器工具栏、标题栏或右侧栏注入点，因此 Thread Shelf 无法在这些宿主区域增加收藏按钮。localhost Dashboard 是在“保持纯插件、跨平台、完全本地”约束下提供点击式管理的入口；`?compact=1` 只是适合窄窗口的页面布局，并不等于宿主原生固定侧栏。
 
-Codex 内置浏览器标签页按任务隔离。`Cmd/Ctrl+Shift+B` 可以显示或隐藏当前任务的浏览器区域，但不能让同一标签页跨任务保留。希望切换任务时无需重开地址，应在 Chrome、Edge 或 Safari 中固定一个紧凑版标签页；页面会根据 Hook 自动跟随当前任务。
+Codex 内置浏览器标签页按任务隔离。Thread Shelf 将它作为默认行为：在每个任务的聊天框选择一次 `@Thread Shelf`，即可打开并绑定该任务的收藏栏；`Cmd/Ctrl+Shift+B` 可以显示或隐藏当前任务的浏览器区域。只有希望同一标签页跨任务保留时，才在 Chrome、Edge 或 Safari 中固定紧凑版页面。
+
+插件可从聊天框中的 `@` 选择，也可输入 `/` 后在 Skills 分组中选择 Thread Shelf；后者插入技能 mention，并不是固定的 `/thread-shelf` 命令。聊天框 `+` 是附件入口，不是插件选择器。单独发送插件或技能 mention 时，Thread Shelf 默认执行“打开当前任务收藏栏”。
 
 Hook 能在任务启动、恢复或提交消息时取得 `session_id`。如果用户只是查看旧任务而宿主没有触发生命周期事件，Dashboard 可能仍指向上一任务；顶部任务下拉框提供明确的手动回退路径。
 

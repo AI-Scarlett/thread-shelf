@@ -1,7 +1,7 @@
 {
   "name": "thread-shelf",
-  "version": "0.2.0+codex.20260714024205",
-  "description": "A cross-platform local Codex task shelf with a browser Dashboard for files, folders, images, HTML pages, and links.",
+  "version": "0.2.0+codex.20260714030118",
+  "description": "A cross-platform local Codex task shelf that opens in the current task's built-in browser.",
   "author": {
     "name": "Zhou Xiaoming"
   },
@@ -20,8 +20,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Thread Shelf",
-    "shortDescription": "A local browser shelf for Codex task artifacts.",
-    "longDescription": "Use a private cross-platform compact Dashboard in one normal-browser tab to click, select, open, reveal, and remove files, folders, images, HTML pages, and links saved for each Codex task.",
+    "shortDescription": "Open a local artifact shelf inside the current Codex task.",
+    "longDescription": "Invoke Thread Shelf from the composer, then open its private localhost Dashboard in the current task's Codex built-in browser to click, select, open, reveal, and remove files, folders, images, HTML pages, and links.",
     "developerName": "Zhou Xiaoming",
     "category": "Productivity",
     "capabilities": [
@@ -30,7 +30,7 @@
       "Interactive"
     ],
     "defaultPrompt": [
-      "\u6253\u5f00 Thread Shelf \u7d27\u51d1\u6536\u85cf\u680f\u3002",
+      "\u5728\u5f53\u524d\u4efb\u52a1\u7684 Codex \u5185\u7f6e\u6d4f\u89c8\u5668\u4e2d\u6253\u5f00 Thread Shelf \u6536\u85cf\u680f\u3002",
       "\u663e\u793a\u5f53\u524d\u4efb\u52a1\u4fdd\u5b58\u7684\u6536\u85cf\u3002",
       "\u6536\u85cf\u5f53\u524d\u4efb\u52a1\u7684\u91cd\u8981\u4ea7\u7269\u3002"
     ]
