@@ -4,9 +4,19 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { BookmarkStore } from "./store.mjs";
 import { normalizeTarget, openTarget, resolveThreadKey } from "./core.mjs";
+import { startDashboard } from "./dashboard-server.mjs";
 
-const server = new McpServer({ name: "thread-shelf", version: "0.1.0" });
+const server = new McpServer({ name: "thread-shelf", version: "0.2.0" });
 const store = new BookmarkStore();
+let dashboard = null;
+try {
+  dashboard = await startDashboard({ store });
+  process.stderr.write(`Thread Shelf dashboard: ${dashboard.url}${dashboard.reused ? " (already running)" : ""}\n`);
+} catch (error) {
+  // The bookmark MCP tools must remain usable even if another process owns the
+  // configured port or the local dashboard cannot be started.
+  process.stderr.write(`Thread Shelf dashboard unavailable: ${error?.message || String(error)}\n`);
+}
 const threadField = { thread_key: z.string().min(1).optional().describe("Stable task/thread key; usually injected by the host") };
 const response = data => ({ content: [{ type: "text", text: JSON.stringify(data, null, 2) }], structuredContent: data });
 const withThread = handler => async (input, extra) => {
@@ -55,5 +65,18 @@ for (const [name, reveal] of [["bookmark_open", false], ["bookmark_reveal", true
     openTarget(bookmark, reveal); return { opened: true, bookmark };
   }));
 }
+
+server.registerTool("bookmark_dashboard", {
+  title: "Open Thread Shelf dashboard",
+  description: "Bind the local dashboard to this Codex task and return its private localhost URL.",
+  inputSchema: { ...threadField, open: z.boolean().optional().describe("Open the dashboard in the default browser; defaults to true") },
+  annotations: { readOnlyHint: false, openWorldHint: true, destructiveHint: false },
+}, withThread((input, key) => {
+  if (!dashboard) throw new Error("The local Thread Shelf dashboard is not available");
+  store.setActiveThread(key);
+  const shouldOpen = input.open !== false;
+  if (shouldOpen) openTarget({ kind: "url", target: dashboard.url, title: "Thread Shelf" });
+  return { thread_key: key, url: dashboard.url, opened: shouldOpen, local_only: true };
+}));
 
 await server.connect(new StdioServerTransport());

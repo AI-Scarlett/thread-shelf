@@ -1,16 +1,20 @@
 {
   "name": "thread-shelf",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "main": "server/index.mjs",
   "scripts": {
     "test": "node --test",
-    "start": "node server/index.mjs"
+    "start": "node server/index.mjs",
+    "dashboard": "node server/dashboard-server.mjs"
   },
-  "keywords": [],
-  "author": "",
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": ["codex", "bookmarks", "dashboard", "localhost"],
+  "author": "Zhou Xiaoming",
   "license": "MIT",
-  "description": "Per-Codex-task bookmarks for local artifacts and URLs",
+  "description": "Cross-platform local Codex task bookmarks with a localhost dashboard",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "zod": "^4.4.3"

@@ -1,6 +1,7 @@
 import { existsSync, statSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 export function resolveThreadKey(input = {}, extra = {}) {
   const meta = extra?._meta || {};
@@ -8,12 +9,19 @@ export function resolveThreadKey(input = {}, extra = {}) {
 }
 export function normalizeTarget(raw, requestedKind) {
   if (typeof raw !== "string" || !raw.trim()) throw new Error("target is required");
-  const value = raw.trim();
+  let value = raw.trim();
   if (/^https?:\/\//i.test(value)) {
     const url = new URL(value);
     return { target: url.href, kind: "url", title: url.hostname };
   }
-  if (/^[a-z][a-z0-9+.-]*:/i.test(value)) throw new Error("Only local paths and HTTP(S) URLs are supported");
+  if (/^file:\/\//i.test(value)) {
+    try { value = fileURLToPath(value); }
+    catch { throw new Error("Invalid local file URL"); }
+  }
+  // A Windows drive path starts with a letter and colon, but it is a local
+  // path rather than a URI scheme. UNC paths are local paths too.
+  const windowsPath = /^[a-z]:[\\/]/i.test(value) || /^\\\\[^\\]+\\[^\\]+/.test(value);
+  if (!windowsPath && /^[a-z][a-z0-9+.-]*:/i.test(value)) throw new Error("Only local paths and HTTP(S) URLs are supported");
   const target = resolve(value);
   if (!existsSync(target)) throw new Error(`Path does not exist: ${target}`);
   const stat = statSync(target), ext = target.toLowerCase().split('.').pop();

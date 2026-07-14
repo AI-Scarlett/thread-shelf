@@ -1,15 +1,27 @@
 {
   "name": "thread-shelf",
-  "version": "0.1.0+codex.20260714013313",
-  "description": "Keep files, folders, images, HTML pages, and links attached to the current Codex task.",
+  "version": "0.2.0+codex.20260714021312",
+  "description": "A cross-platform local Codex task shelf with a browser Dashboard for files, folders, images, HTML pages, and links.",
   "author": {
     "name": "Zhou Xiaoming"
   },
+  "homepage": "https://github.com/AI-Scarlett/thread-shelf",
+  "repository": "https://github.com/AI-Scarlett/thread-shelf",
+  "license": "MIT",
+  "keywords": [
+    "bookmarks",
+    "codex",
+    "dashboard",
+    "localhost",
+    "windows",
+    "linux",
+    "productivity"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Thread Shelf",
-    "shortDescription": "A per-task shelf for useful files and links.",
-    "longDescription": "Save, list, rename, reorder, open, and remove local files, folders, images, HTML pages, and web links without searching old task history.",
+    "shortDescription": "A local browser shelf for Codex task artifacts.",
+    "longDescription": "Use a private cross-platform Dashboard to click, select, open, reveal, and remove files, folders, images, HTML pages, and links saved for each Codex task.",
     "developerName": "Zhou Xiaoming",
     "category": "Productivity",
     "capabilities": [
@@ -18,9 +30,9 @@
       "Interactive"
     ],
     "defaultPrompt": [
+      "Show me how to open the local Thread Shelf Dashboard.",
       "Show the bookmarks saved for this task.",
-      "Save the important files and links from this task.",
-      "Open my Thread Shelf for this task."
+      "Save the important outputs from this task."
     ]
   },
   "mcpServers": "./.mcp.json"
