@@ -1,6 +1,6 @@
 {
   "name": "thread-shelf",
-  "version": "0.2.0+codex.20260714021312",
+  "version": "0.2.0+codex.20260714021721",
   "description": "A cross-platform local Codex task shelf with a browser Dashboard for files, folders, images, HTML pages, and links.",
   "author": {
     "name": "Zhou Xiaoming"

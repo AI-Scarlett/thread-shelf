@@ -3,6 +3,7 @@ import { createReadStream, existsSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join, resolve, win32 } from "node:path";
 import { createInterface } from "node:readline";
+import { fileURLToPath } from "node:url";
 import { normalizeTarget } from "./core.mjs";
 
 export const DEFAULT_CODEX_HOME = resolve(process.env.CODEX_HOME || join(homedir(), ".codex"));
@@ -179,7 +180,7 @@ function pathIsSensitiveOrNoise(path, context) {
 function cleanPathText(raw) {
   let value = raw.trim().replace(/^<|>$/g, "");
   if (value.startsWith("file://")) {
-    try { value = decodeURIComponent(new URL(value).pathname); } catch { return null; }
+    try { value = fileURLToPath(value); } catch { return null; }
   }
   value = value.replace(/[#:]L?\d+(?::\d+)?$/i, "");
   value = value.replace(/[.,;:!?\]\[}\)>]+$/g, "");
@@ -202,9 +203,10 @@ function existingPathFrom(raw) {
 export function extractRawPathCandidates(text) {
   const result = [];
   const patterns = [
-    /!?(?:\[[^\]]*\])\((?:<)?(file:\/\/\/[^)>\n]+|\/[^)>\n]+)(?:>)?\)/g,
-    /`(file:\/\/\/[^`\n]+|\/[^`\n]+)`/g,
-    /<(file:\/\/\/[^>\n]+|\/[^>\n]+)>/g,
+    /!?(?:\[[^\]]*\])\((?:<)?(file:\/\/[^)>\n]+|\/[^)>\n]+|[A-Za-z]:\\[^)>\n]+|\\\\[^)>\n]+)(?:>)?\)/g,
+    /`(file:\/\/[^`\n]+|\/[^`\n]+|[A-Za-z]:\\[^`\n]+|\\\\[^`\n]+)`/g,
+    /<(file:\/\/[^>\n]+|\/[^>\n]+|[A-Za-z]:\\[^>\n]+|\\\\[^>\n]+)>/g,
+    /(?:^|[\s"'(])(file:\/\/[^\n\r\t"'`<>|{}\[\]]+)/gm,
     /(?:^|[\s"'(])(\/(?:Users|home|tmp|private|var|Volumes|Applications|opt|workspace|root)\/[^\n\r\t"'`<>|{}\[\]]+)/gm,
     /(?:^|[\s"'(])([A-Za-z]:\\(?:[^\n\r\t"'`<>|{}\[\]]+))/gm,
     /(?:^|[\s"'(])(\\\\[^\\\s]+\\[^\n\r\t"'`<>|{}\[\]]+)/gm,
@@ -212,7 +214,7 @@ export function extractRawPathCandidates(text) {
   for (const pattern of patterns) {
     for (const match of text.matchAll(pattern)) result.push(match[1]);
   }
-  return result;
+  return [...new Set(result)];
 }
 
 export function extractCandidatesFromText(text, context = {}) {
