@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "thread-shelf": {
+      "command": "node",
+      "args": ["./server/index.mjs"],
+      "cwd": "."
+    }
+  }
+}

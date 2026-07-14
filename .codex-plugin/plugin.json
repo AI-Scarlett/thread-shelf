@@ -1,0 +1,27 @@
+{
+  "name": "thread-shelf",
+  "version": "0.1.0+codex.20260714013313",
+  "description": "Keep files, folders, images, HTML pages, and links attached to the current Codex task.",
+  "author": {
+    "name": "Zhou Xiaoming"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Thread Shelf",
+    "shortDescription": "A per-task shelf for useful files and links.",
+    "longDescription": "Save, list, rename, reorder, open, and remove local files, folders, images, HTML pages, and web links without searching old task history.",
+    "developerName": "Zhou Xiaoming",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Interactive"
+    ],
+    "defaultPrompt": [
+      "Show the bookmarks saved for this task.",
+      "Save the important files and links from this task.",
+      "Open my Thread Shelf for this task."
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}
