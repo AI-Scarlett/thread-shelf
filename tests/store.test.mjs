@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
-import { BookmarkStore } from "../server/store.mjs";
+import { pathToFileURL } from "node:url";
+import { BookmarkStore, resolveDefaultDbPath } from "../server/store.mjs";
 import { normalizeTarget, resolveThreadKey } from "../server/core.mjs";
 
 test("isolates tasks and removal never deletes the disk file", () => {
@@ -18,4 +19,32 @@ test("resolves explicit and host task keys", () => {
   assert.equal(resolveThreadKey({ thread_key: "explicit" }, { _meta: { "openai/session": "host" } }), "explicit");
   assert.equal(resolveThreadKey({}, { _meta: { "openai/session": "host" } }), "host"); assert.equal(resolveThreadKey({}, { sessionId: "transport" }), "transport");
 });
-test("rejects unsupported URL schemes", () => assert.throws(() => normalizeTarget("file:///etc/passwd"), /Only local paths/));
+test("accepts file URLs and rejects unsupported URL schemes", () => {
+  const dir = mkdtempSync(join(tmpdir(), "thread-shelf-file-url-"));
+  const file = join(dir, "artifact.txt");
+  writeFileSync(file, "artifact");
+  assert.equal(normalizeTarget(pathToFileURL(file).href).target, file);
+  assert.throws(() => normalizeTarget("ftp://example.com/file"), /Only local paths/);
+  assert.throws(() => normalizeTarget("C:\\missing\\report.html"), /Path does not exist/);
+});
+test("persists one active task binding", () => {
+  const dir = mkdtempSync(join(tmpdir(), "thread-shelf-active-"));
+  const path = join(dir, "test.sqlite");
+  const first = new BookmarkStore(path);
+  assert.equal(first.getActiveThread(), null);
+  assert.equal(first.setActiveThread("task-a").thread, "task-a");
+  first.close();
+  const reopened = new BookmarkStore(path);
+  assert.equal(reopened.getActiveThread().thread, "task-a");
+  reopened.close();
+});
+test("MCP and companion share a fixed database unless THREAD_SHELF_DATA is explicit", () => {
+  assert.equal(
+    resolveDefaultDbPath({ PLUGIN_DATA: "/plugin-only" }, "/Users/tester"),
+    resolve("/Users/tester/.codex/thread-shelf/bookmarks.sqlite"),
+  );
+  assert.equal(
+    resolveDefaultDbPath({ PLUGIN_DATA: "/plugin-only", THREAD_SHELF_DATA: "/shared/shelf" }, "/Users/tester"),
+    resolve("/shared/shelf/bookmarks.sqlite"),
+  );
+});

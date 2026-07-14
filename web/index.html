@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f4f0e8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#171818" media="(prefers-color-scheme: dark)">
+  <title>Thread Shelf · 本地收藏栏</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要内容</a>
+
+  <div class="app-shell">
+    <header class="app-header">
+      <a class="brand" href="/" aria-label="Thread Shelf 首页">
+        <span class="brand-mark" aria-hidden="true">T</span>
+        <span>
+          <strong>Thread Shelf</strong>
+          <small>本地任务收藏栏</small>
+        </span>
+      </a>
+
+      <div class="task-tools">
+        <label class="task-picker">
+          <span>当前任务</span>
+          <select id="thread-select" aria-label="选择 Codex 任务" disabled>
+            <option>正在读取任务…</option>
+          </select>
+        </label>
+        <a id="open-codex" class="button button-secondary is-disabled" aria-disabled="true">
+          <span aria-hidden="true">↗</span>
+          <span>跳回 Codex</span>
+        </a>
+        <button id="refresh" class="button button-icon" type="button" title="刷新全部内容" aria-label="刷新全部内容">
+          <span aria-hidden="true">↻</span>
+        </button>
+        <a id="view-mode" class="button button-secondary mode-button" href="/?compact=1">窄栏</a>
+      </div>
+    </header>
+
+    <p class="browser-hint">
+      <span aria-hidden="true">▥</span>
+      <span>此页可以留在当前 Codex 任务的内置浏览器中。切换任务后，在新任务的聊天框再次选择 <strong>@Thread Shelf</strong>；<kbd>Cmd/Ctrl+Shift+B</kbd> 可显示或隐藏。</span>
+      <button id="open-system-browser" class="text-button browser-open-button" type="button">跨任务固定到系统浏览器</button>
+    </p>
+
+    <main id="main-content">
+      <div id="status" class="status" role="status" aria-live="polite" hidden></div>
+
+      <section id="drop-zone" class="add-card" aria-labelledby="add-heading">
+        <div class="add-copy">
+          <p class="eyebrow">快速收藏</p>
+          <h1 id="add-heading">把这个任务的重要产物放在手边</h1>
+          <p>输入本机路径或 HTTP(S) 网址，也可以用系统选择器选取文件与目录。</p>
+        </div>
+
+        <form id="add-form" class="add-form">
+          <label class="input-wrap" for="target-input">
+            <span class="input-icon" aria-hidden="true">＋</span>
+            <input id="target-input" name="target" type="text" autocomplete="off" spellcheck="false"
+              placeholder="C:\工作\报告.pdf、/Users/me/report.pdf 或 https://…" required>
+          </label>
+          <button id="add-button" class="button button-primary" type="submit">收藏</button>
+        </form>
+
+        <div class="quick-actions" aria-label="其他收藏方式">
+          <button id="pick-file" class="text-button" type="button"><span aria-hidden="true">▤</span> 选择文件</button>
+          <button id="pick-directory" class="text-button" type="button"><span aria-hidden="true">▰</span> 选择目录</button>
+          <button id="paste-clipboard" class="text-button" type="button"><span aria-hidden="true">▣</span> 收藏剪贴板</button>
+          <span class="drop-tip"><span aria-hidden="true">↓</span> 也可把网址或文件拖到这里</span>
+        </div>
+      </section>
+
+      <div class="content-grid">
+        <section class="shelf-card" aria-labelledby="candidate-heading">
+          <header class="section-header">
+            <div>
+              <p class="eyebrow">从当前对话发现</p>
+              <h2 id="candidate-heading">候选产物</h2>
+            </div>
+            <span id="candidate-count" class="count" aria-label="候选产物数量">0</span>
+          </header>
+          <p class="section-note">自动识别回复里出现的文件、目录和网址；点星标即可收藏。</p>
+          <div id="candidate-loading" class="loading-list" hidden aria-hidden="true">
+            <i></i><i></i><i></i>
+          </div>
+          <ul id="candidate-list" class="item-list" aria-live="polite"></ul>
+          <div id="candidate-empty" class="empty-state" hidden>
+            <span aria-hidden="true">✦</span>
+            <strong>还没有发现候选产物</strong>
+            <p>当 Codex 回复中出现本机文件或网址，它们会显示在这里。</p>
+          </div>
+        </section>
+
+        <section class="shelf-card" aria-labelledby="bookmark-heading">
+          <header class="section-header">
+            <div>
+              <p class="eyebrow">仅保存在本机</p>
+              <h2 id="bookmark-heading">已收藏</h2>
+            </div>
+            <span id="bookmark-count" class="count" aria-label="收藏数量">0</span>
+          </header>
+          <p class="section-note">收藏按 Codex 任务隔离；打开、定位或移除都不会改动原文件。</p>
+          <div id="bookmark-loading" class="loading-list" hidden aria-hidden="true">
+            <i></i><i></i><i></i>
+          </div>
+          <ul id="bookmark-list" class="item-list" aria-live="polite"></ul>
+          <div id="bookmark-empty" class="empty-state" hidden>
+            <span aria-hidden="true">⌑</span>
+            <strong>这个任务还没有收藏</strong>
+            <p>从候选中点星标，或在上方添加路径和网址。</p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <span><i class="local-dot" aria-hidden="true"></i> 本地服务</span>
+      <span>适用于 macOS、Windows 与 Linux</span>
+    </footer>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
