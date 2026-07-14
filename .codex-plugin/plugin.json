@@ -1,6 +1,6 @@
 {
   "name": "thread-shelf",
-  "version": "0.2.0+codex.20260714030118",
+  "version": "0.2.0+codex.20260714031823",
   "description": "A cross-platform local Codex task shelf that opens in the current task's built-in browser.",
   "author": {
     "name": "Zhou Xiaoming"

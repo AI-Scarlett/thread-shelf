@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { createServer } from "node:http";
-import { createReadStream, existsSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { spawn } from "node:child_process";
-import { dirname, extname, isAbsolute, join, relative, resolve } from "node:path";
+import { dirname, extname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { BookmarkStore } from "./store.mjs";
 import { openTarget } from "./core.mjs";
@@ -222,37 +222,57 @@ async function apiRequest(req, res, url, context) {
   throw new HttpError(404, "API endpoint not found");
 }
 
-function safeStaticPath(rawUrl, webRoot) {
+function snapshotStaticFiles(webRoot) {
+  const root = resolve(webRoot);
+  if (!existsSync(root) || !statSync(root).isDirectory()) {
+    throw new Error(`Dashboard web root does not exist: ${root}`);
+  }
+  const files = new Map();
+  const pending = [root];
+  while (pending.length) {
+    const directory = pending.pop();
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const target = join(directory, entry.name);
+      if (entry.isDirectory()) {
+        pending.push(target);
+      } else if (entry.isFile()) {
+        const key = relative(root, target).split(sep).join("/");
+        files.set(key, { body: readFileSync(target), type: contentType(target) });
+      }
+    }
+  }
+  if (!files.has("index.html")) throw new Error(`Dashboard web root is missing index.html: ${root}`);
+  return files;
+}
+
+function safeStaticKey(rawUrl, staticFiles) {
   const rawPath = String(rawUrl || "/").split("?", 1)[0];
   let decoded;
   try { decoded = decodeURIComponent(rawPath); }
   catch { throw new HttpError(400, "Invalid URL encoding"); }
   if (decoded.includes("\0") || decoded.includes("\\")) throw new HttpError(403, "Invalid static path");
   if (decoded.split("/").some(part => part === "..")) throw new HttpError(403, "Path traversal is not allowed");
-  const requested = decoded === "/" ? "/index.html" : decoded;
-  const root = resolve(webRoot);
-  let target = resolve(root, `.${requested}`);
-  const rel = relative(root, target);
-  if (rel.startsWith("..") || isAbsolute(rel)) throw new HttpError(403, "Path traversal is not allowed");
-  if (existsSync(target) && statSync(target).isDirectory()) target = join(target, "index.html");
-  return target;
+  const requested = decoded === "/" ? "index.html" : decoded.replace(/^\/+/, "");
+  if (staticFiles.has(requested)) return requested;
+  const directoryIndex = `${requested.replace(/\/+$/, "")}/index.html`;
+  return staticFiles.has(directoryIndex) ? directoryIndex : requested;
 }
 
-function serveStatic(req, res, webRoot) {
+function serveStatic(req, res, staticFiles) {
   if (!["GET", "HEAD"].includes(req.method)) throw new HttpError(405, "Method not allowed");
-  const target = safeStaticPath(req.url, webRoot);
-  if (!existsSync(target) || !statSync(target).isFile()) throw new HttpError(404, "Not found");
-  const stat = statSync(target);
+  const key = safeStaticKey(req.url, staticFiles);
+  const asset = staticFiles.get(key);
+  if (!asset) throw new HttpError(404, "Not found");
   res.writeHead(200, {
-    "Content-Type": contentType(target),
-    "Content-Length": stat.size,
+    "Content-Type": asset.type,
+    "Content-Length": asset.body.length,
     "Cache-Control": "no-cache",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "no-referrer",
     "Content-Security-Policy": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
   });
   if (req.method === "HEAD") return res.end();
-  createReadStream(target).pipe(res);
+  res.end(asset.body);
 }
 
 export function createDashboardServer({
@@ -265,6 +285,7 @@ export function createDashboardServer({
   getOrigin,
 } = {}) {
   if (!store) throw new Error("store is required");
+  const staticFiles = snapshotStaticFiles(webRoot);
   return createServer(async (req, res) => {
     try {
       const origin = getOrigin();
@@ -274,7 +295,7 @@ export function createDashboardServer({
       if (url.pathname.startsWith("/api/")) {
         await apiRequest(req, res, url, { store, stateDbPath, opener, picker, bodyLimit, origin });
       } else {
-        serveStatic(req, res, webRoot);
+        serveStatic(req, res, staticFiles);
       }
     } catch (error) {
       if (res.headersSent) return res.destroy(error);
@@ -310,7 +331,13 @@ export async function startDashboard({
   const ownsStore = !suppliedStore;
   const store = suppliedStore || new BookmarkStore(dbPath);
   let origin = `http://${DASHBOARD_HOST}:${port}`;
-  const server = createDashboardServer({ store, stateDbPath, webRoot, opener, picker, bodyLimit, getOrigin: () => origin });
+  let server;
+  try {
+    server = createDashboardServer({ store, stateDbPath, webRoot, opener, picker, bodyLimit, getOrigin: () => origin });
+  } catch (error) {
+    if (ownsStore) store.close();
+    throw error;
+  }
   try {
     await new Promise((resolvePromise, reject) => {
       const onError = error => { server.off("listening", onListening); reject(error); };

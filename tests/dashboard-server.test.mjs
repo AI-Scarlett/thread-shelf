@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { DatabaseSync } from "node:sqlite";
 import { EventEmitter } from "node:events";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { request as httpRequest } from "node:http";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
@@ -121,6 +121,38 @@ test("serves the dashboard and supports the complete task bookmark API", async t
   result = await mutation(dashboard.url, `/api/bookmarks/${bookmark.id}?thread=thread-a`, "DELETE", {});
   assert.equal(result.body.removed, true);
   assert.equal(result.body.disk_file_deleted, false);
+});
+
+test("keeps serving snapshotted web assets after the plugin cache directory is removed", async t => {
+  const data = fixture();
+  writeFileSync(join(data.webRoot, "styles.css"), "body { color: green; }");
+  writeFileSync(join(data.webRoot, "app.js"), "document.body.dataset.ready = 'true';");
+  const dashboard = await startDashboard({
+    port: 0,
+    dbPath: data.dbPath,
+    stateDbPath: data.stateDb,
+    webRoot: data.webRoot,
+  });
+  t.after(() => dashboard.close());
+
+  rmSync(data.webRoot, { recursive: true, force: true });
+
+  const page = await fetch(`${dashboard.url}/?compact=1`);
+  assert.equal(page.status, 200);
+  assert.match(page.headers.get("content-type"), /^text\/html/);
+  assert.match(await page.text(), /Thread Shelf/);
+
+  const styles = await fetch(`${dashboard.url}/styles.css`);
+  assert.equal(styles.status, 200);
+  assert.equal(await styles.text(), "body { color: green; }");
+
+  const script = await fetch(`${dashboard.url}/app.js`);
+  assert.equal(script.status, 200);
+  assert.equal(await script.text(), "document.body.dataset.ready = 'true';");
+
+  const traversal = await rawGet(dashboard.url, "/%2e%2e/secret.txt");
+  assert.equal(traversal.status, 403);
+  assert.doesNotMatch(traversal.body, /secret$/);
 });
 
 test("rejects cross-origin, non-JSON, oversized, CORS, and traversal requests", async t => {
