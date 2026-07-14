@@ -5,6 +5,7 @@ import { z } from "zod";
 import { BookmarkStore } from "./store.mjs";
 import { normalizeTarget, openTarget, resolveThreadKey } from "./core.mjs";
 import { startDashboard } from "./dashboard-server.mjs";
+import { compactDashboardUrl, dashboardToolResponse, shouldOpenDashboard } from "./dashboard-link.mjs";
 
 const server = new McpServer({ name: "thread-shelf", version: "0.2.0" });
 const store = new BookmarkStore();
@@ -19,11 +20,11 @@ try {
 }
 const threadField = { thread_key: z.string().min(1).optional().describe("Stable task/thread key; usually injected by the host") };
 const response = data => ({ content: [{ type: "text", text: JSON.stringify(data, null, 2) }], structuredContent: data });
-const withThread = handler => async (input, extra) => {
+const withThread = (handler, format = response) => async (input, extra) => {
   try {
     const key = resolveThreadKey(input, extra);
     if (!key) throw new Error("The host did not provide a task identifier. Pass thread_key explicitly for this task.");
-    return response(await handler(input, key));
+    return format(await handler(input, key));
   } catch (error) { return { isError: true, content: [{ type: "text", text: error.message }] }; }
 };
 
@@ -67,16 +68,17 @@ for (const [name, reveal] of [["bookmark_open", false], ["bookmark_reveal", true
 }
 
 server.registerTool("bookmark_dashboard", {
-  title: "Open Thread Shelf dashboard",
-  description: "Bind the local dashboard to this Codex task and return its private localhost URL.",
-  inputSchema: { ...threadField, open: z.boolean().optional().describe("Open the dashboard in the default browser; defaults to true") },
+  title: "Show Thread Shelf dashboard",
+  description: "Bind the local dashboard to this Codex task and return a clickable compact localhost URL.",
+  inputSchema: { ...threadField, open: z.boolean().optional().describe("Open the compact dashboard in the system default browser; defaults to false") },
   annotations: { readOnlyHint: false, openWorldHint: true, destructiveHint: false },
 }, withThread((input, key) => {
   if (!dashboard) throw new Error("The local Thread Shelf dashboard is not available");
   store.setActiveThread(key);
-  const shouldOpen = input.open !== false;
-  if (shouldOpen) openTarget({ kind: "url", target: dashboard.url, title: "Thread Shelf" });
-  return { thread_key: key, url: dashboard.url, opened: shouldOpen, local_only: true };
-}));
+  const shouldOpen = shouldOpenDashboard(input.open);
+  const url = compactDashboardUrl(dashboard.url);
+  if (shouldOpen) openTarget({ kind: "url", target: url, title: "Thread Shelf" });
+  return dashboardToolResponse({ threadKey: key, dashboardUrl: dashboard.url, opened: shouldOpen });
+}, result => result));
 
 await server.connect(new StdioServerTransport());

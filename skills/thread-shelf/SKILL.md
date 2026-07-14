@@ -5,21 +5,22 @@ description: Use the cross-platform local Thread Shelf Dashboard or MCP fallback
 
 # Thread Shelf
 
-Thread Shelf is a pure local Codex plugin for macOS, Windows, and Linux. Its primary clickable UI is the browser Dashboard at `http://127.0.0.1:43125`. It does not require an Apps SDK App, public HTTPS endpoint, tunnel, or native companion application.
+Thread Shelf is a pure local Codex plugin for macOS, Windows, and Linux. Its primary clickable UI is the browser Dashboard; the narrow-pane-friendly URL is `http://127.0.0.1:43125/?compact=1`. It does not require an Apps SDK App, public HTTPS endpoint, tunnel, or native companion application.
 
 ## Prefer the clickable workflow
 
 When the user asks how to bookmark, view the shelf, or avoid natural-language commands:
 
-1. Direct them to `http://127.0.0.1:43125`.
-2. Tell them to confirm the Codex task in the top task selector. A trusted Hook normally keeps this current; manual selection is the fallback.
-3. To save a discovered output, click its star in the candidate list.
-4. To add another target, use the file/directory picker, local-path or HTTP(S)-URL field, clipboard action, or supported drag and drop.
-5. Use the saved item's actions to open it, reveal it in Finder/File Explorer/the Linux file manager, or remove the bookmark.
+1. Give them the clickable compact URL `http://127.0.0.1:43125/?compact=1`.
+2. Recommend pinning one compact Dashboard tab in their normal Chrome, Edge, or Safari browser. If they are viewing the page in Codex's in-app Browser, tell them to click “在系统浏览器打开” once and pin the new normal-browser tab. That page can follow Hook task updates. Do not claim that a Codex in-app Browser tab persists across tasks: it is task-scoped. `Cmd/Ctrl+Shift+B` only shows or hides the in-app Browser for the current task.
+3. Tell them to confirm the Codex task in the top task selector. A trusted Hook normally keeps this current; manual selection is the fallback.
+4. To save a discovered output, click its star in the candidate list.
+5. To add another target, use the file/directory picker, local-path or HTTP(S)-URL field, clipboard action, or supported drag and drop.
+6. Use the saved item's actions to open it, reveal it in Finder/File Explorer/the Linux file manager, or remove the bookmark.
 
-The plugin MCP normally starts the localhost service. If the user explicitly asks Codex to open the Dashboard, use `bookmark_dashboard` when available; otherwise give the local URL. If the page is unavailable, instruct the user to run `npm run dashboard` from the plugin source directory. Do not claim that Thread Shelf automatically opens a browser without an explicit user action.
+The plugin MCP normally starts the localhost service. If the user asks for the Dashboard, use `bookmark_dashboard` when available; it returns a clickable compact URL and does not open a browser by default. Pass `open: true` only when the user explicitly asks to open it, and describe that action as opening the system default browser, not the Codex in-app Browser. If the page is unavailable, instruct the user to run `npm run dashboard` from the plugin source directory.
 
-Do not tell the user to install a menu-bar, system-tray, or desktop companion. Do not claim that Thread Shelf can inject a button into Codex's native right-click menu or title bar.
+Do not tell the user to install a menu-bar, system-tray, or desktop companion. Do not claim that Thread Shelf can inject a button into Codex's native right-click menu, title bar, Browser toolbar, or right sidebar. The compact page is a layout, not a host-pinned sidebar.
 
 ## Natural-language fallback
 

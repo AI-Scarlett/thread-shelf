@@ -11,6 +11,8 @@ Thread Shelf 是一个跨平台、纯本地的 Codex 插件。它把点击式 UI
 - macOS、Windows、Linux（Node.js 22+）共用一套插件代码。
 - 只监听 loopback 的 localhost Dashboard；默认端口 `43125`，支持固定端口覆盖。
 - 当前任务下拉选择、刷新和 `codex://threads/<id>` 跳转。
+- `?compact=1` 紧凑布局，适配窄浏览器窗口并保留收藏、打开、定位、移除等操作。
+- `bookmark_dashboard` 默认只返回紧凑版可点击链接；只有显式 `open: true` 才打开系统默认浏览器。
 - 页面可见时自动轮询当前任务、候选与收藏，页面隐藏时暂停。
 - 从 Codex 回复中发现本机文件、目录和 HTTP(S) 网址候选。
 - 候选项星标一键收藏。
@@ -42,7 +44,9 @@ Thread Shelf 是一个跨平台、纯本地的 Codex 插件。它把点击式 UI
 
 ## Codex 宿主边界
 
-Codex 普通插件没有面向第三方的原生右键菜单或标题栏注入点，因此 Thread Shelf 无法在 Codex 自带的 `Copy Link` 菜单中增加一项。localhost Dashboard 是在“保持纯插件、跨平台、完全本地”约束下提供点击式管理的入口。
+Codex 普通插件没有面向第三方的原生右键菜单、内置浏览器工具栏、标题栏或右侧栏注入点，因此 Thread Shelf 无法在这些宿主区域增加收藏按钮。localhost Dashboard 是在“保持纯插件、跨平台、完全本地”约束下提供点击式管理的入口；`?compact=1` 只是适合窄窗口的页面布局，并不等于宿主原生固定侧栏。
+
+Codex 内置浏览器标签页按任务隔离。`Cmd/Ctrl+Shift+B` 可以显示或隐藏当前任务的浏览器区域，但不能让同一标签页跨任务保留。希望切换任务时无需重开地址，应在 Chrome、Edge 或 Safari 中固定一个紧凑版标签页；页面会根据 Hook 自动跟随当前任务。
 
 Hook 能在任务启动、恢复或提交消息时取得 `session_id`。如果用户只是查看旧任务而宿主没有触发生命周期事件，Dashboard 可能仍指向上一任务；顶部任务下拉框提供明确的手动回退路径。
 

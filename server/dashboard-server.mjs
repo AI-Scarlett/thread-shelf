@@ -149,7 +149,7 @@ function queryInput(url) {
 }
 
 async function apiRequest(req, res, url, context) {
-  const { store, stateDbPath, opener, picker, bodyLimit } = context;
+  const { store, stateDbPath, opener, picker, bodyLimit, origin } = context;
   const common = { store, opener };
   const state = { state_db: stateDbPath };
   const path = url.pathname;
@@ -180,6 +180,11 @@ async function apiRequest(req, res, url, context) {
   if (path === "/api/current" && req.method === "POST") {
     const result = await executeCommand({ command: "set-current", ...input }, common);
     return json(res, 200, { ...result, current: result.thread });
+  }
+  if (path === "/api/open-system-browser" && req.method === "POST") {
+    const target = new URL("/?compact=1", origin).toString();
+    await opener({ kind: "url", target, title: "Thread Shelf" }, false);
+    return json(res, 200, { ok: true, opened: true, url: target, browser: "system_default" });
   }
   if ((path === "/api/pick" || path === "/api/pick-file" || path === "/api/pick-directory") && req.method === "POST") {
     const kind = path === "/api/pick-file" ? "file" : path === "/api/pick-directory" ? "directory" : input.kind;
@@ -267,7 +272,7 @@ export function createDashboardServer({
       if (req.method === "OPTIONS") throw new HttpError(403, "CORS requests are not allowed");
       const url = new URL(req.url || "/", origin);
       if (url.pathname.startsWith("/api/")) {
-        await apiRequest(req, res, url, { store, stateDbPath, opener, picker, bodyLimit });
+        await apiRequest(req, res, url, { store, stateDbPath, opener, picker, bodyLimit, origin });
       } else {
         serveStatic(req, res, webRoot);
       }

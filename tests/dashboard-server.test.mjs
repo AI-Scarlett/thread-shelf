@@ -111,6 +111,13 @@ test("serves the dashboard and supports the complete task bookmark API", async t
   assert.equal(result.body.revealed, true);
   assert.deepEqual(opened.map(item => item.reveal), [false, true]);
 
+  result = await mutation(dashboard.url, "/api/open-system-browser", "POST", {});
+  assert.equal(result.body.opened, true);
+  assert.equal(result.body.browser, "system_default");
+  assert.equal(result.body.url, `${dashboard.url}/?compact=1`);
+  assert.equal(opened.at(-1).bookmark.target, `${dashboard.url}/?compact=1`);
+  assert.equal(opened.at(-1).reveal, false);
+
   result = await mutation(dashboard.url, `/api/bookmarks/${bookmark.id}?thread=thread-a`, "DELETE", {});
   assert.equal(result.body.removed, true);
   assert.equal(result.body.disk_file_deleted, false);

@@ -1,6 +1,6 @@
 {
   "name": "thread-shelf",
-  "version": "0.2.0+codex.20260714021721",
+  "version": "0.2.0+codex.20260714024205",
   "description": "A cross-platform local Codex task shelf with a browser Dashboard for files, folders, images, HTML pages, and links.",
   "author": {
     "name": "Zhou Xiaoming"
@@ -21,7 +21,7 @@
   "interface": {
     "displayName": "Thread Shelf",
     "shortDescription": "A local browser shelf for Codex task artifacts.",
-    "longDescription": "Use a private cross-platform Dashboard to click, select, open, reveal, and remove files, folders, images, HTML pages, and links saved for each Codex task.",
+    "longDescription": "Use a private cross-platform compact Dashboard in one normal-browser tab to click, select, open, reveal, and remove files, folders, images, HTML pages, and links saved for each Codex task.",
     "developerName": "Zhou Xiaoming",
     "category": "Productivity",
     "capabilities": [
@@ -30,9 +30,9 @@
       "Interactive"
     ],
     "defaultPrompt": [
-      "Show me how to open the local Thread Shelf Dashboard.",
-      "Show the bookmarks saved for this task.",
-      "Save the important outputs from this task."
+      "\u6253\u5f00 Thread Shelf \u7d27\u51d1\u6536\u85cf\u680f\u3002",
+      "\u663e\u793a\u5f53\u524d\u4efb\u52a1\u4fdd\u5b58\u7684\u6536\u85cf\u3002",
+      "\u6536\u85cf\u5f53\u524d\u4efb\u52a1\u7684\u91cd\u8981\u4ea7\u7269\u3002"
     ]
   },
   "mcpServers": "./.mcp.json"

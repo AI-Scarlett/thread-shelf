@@ -1,9 +1,14 @@
+const compactMode = new URLSearchParams(window.location.search).get("compact") === "1";
+document.documentElement.classList.toggle("compact-mode", compactMode);
+
 const $ = (selector) => document.querySelector(selector);
 
 const elements = {
   threadSelect: $("#thread-select"),
   openCodex: $("#open-codex"),
+  openSystemBrowser: $("#open-system-browser"),
   refresh: $("#refresh"),
+  viewMode: $("#view-mode"),
   status: $("#status"),
   dropZone: $("#drop-zone"),
   addForm: $("#add-form"),
@@ -22,6 +27,17 @@ const elements = {
   bookmarkCount: $("#bookmark-count"),
   toast: $("#toast"),
 };
+
+if (compactMode) {
+  document.title = "Thread Shelf · 紧凑收藏栏";
+  elements.viewMode.href = window.location.pathname;
+  elements.viewMode.textContent = "宽版";
+  elements.viewMode.title = "切换到宽版 Dashboard";
+} else {
+  elements.viewMode.href = `${window.location.pathname}?compact=1`;
+  elements.viewMode.textContent = "窄栏";
+  elements.viewMode.title = "切换到适合窄窗口的紧凑版";
+}
 
 const state = {
   threads: [],
@@ -481,6 +497,17 @@ function fileUrlToPath(value) {
 
 elements.threadSelect.addEventListener("change", () => selectThread(elements.threadSelect.value));
 elements.refresh.addEventListener("click", () => refreshAll({ announce: true }));
+elements.openSystemBrowser.addEventListener("click", async () => {
+  setButtonBusy(elements.openSystemBrowser, true, "正在打开…");
+  try {
+    await api("/api/open-system-browser", { method: "POST", body: "{}" });
+    showToast("已在系统默认浏览器打开；请把该标签页固定起来", "success", 5200);
+  } catch (error) {
+    showToast(`无法打开系统浏览器：${errorMessage(error)}`, "error", 5200);
+  } finally {
+    setButtonBusy(elements.openSystemBrowser, false);
+  }
+});
 
 elements.addForm.addEventListener("submit", async (event) => {
   event.preventDefault();

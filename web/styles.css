@@ -154,6 +154,7 @@ button:disabled, select:disabled { cursor: not-allowed; opacity: .56; }
 .button-icon { width: 40px; padding: 0; color: var(--ink); border-color: var(--line); background: var(--surface-solid); font-size: 21px; }
 .button-icon:hover { border-color: var(--line-strong); }
 .is-disabled { pointer-events: none; opacity: .5; }
+.mode-button { min-width: 58px; }
 
 button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--accent) 27%, transparent);
@@ -161,6 +162,32 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 }
 
 main { flex: 1; }
+
+.browser-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -6px 2px 16px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--surface-solid) 68%, transparent);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.browser-hint kbd {
+  padding: 2px 5px;
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  color: var(--ink);
+  background: var(--surface-solid);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  white-space: nowrap;
+}
+.browser-open-button { flex: 0 0 auto; margin-left: auto; white-space: nowrap; }
 
 .status {
   margin: 0 0 14px;
@@ -341,6 +368,66 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 19px
   footer { display: block; text-align: center; }
   footer span { display: block; margin: 5px 0; }
 }
+
+html.compact-mode { min-width: 260px; }
+
+.compact-mode .app-shell {
+  width: 100%;
+  max-width: 520px;
+  padding: 0 10px;
+}
+.compact-mode .app-header {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: block;
+  padding: 10px 0 9px;
+  background: color-mix(in srgb, var(--canvas) 88%, transparent);
+  backdrop-filter: blur(18px);
+}
+.compact-mode .brand-mark { width: 32px; height: 32px; border-radius: 10px 10px 10px 3px; font-size: 17px; }
+.compact-mode .brand strong { font-size: 15px; }
+.compact-mode .brand small { display: none; }
+.compact-mode .task-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 40px auto;
+  gap: 7px;
+  margin-top: 10px;
+}
+.compact-mode .task-picker { grid-column: 1 / -1; min-width: 0; }
+.compact-mode .task-picker > span { display: none; }
+.compact-mode #open-codex { min-width: 0; }
+.compact-mode .mode-button { min-width: 54px; padding-inline: 10px; }
+.compact-mode .browser-hint { align-items: flex-start; flex-wrap: wrap; margin: 0 0 10px; padding: 8px 10px; font-size: 10px; }
+.compact-mode .browser-hint kbd { white-space: normal; }
+.compact-mode .browser-open-button { margin-left: 24px; }
+.compact-mode .status { margin-bottom: 10px; }
+.compact-mode .add-card {
+  grid-template-columns: 1fr;
+  gap: 12px;
+  padding: 16px 13px 14px;
+  border-radius: 15px;
+}
+.compact-mode .add-card::after { width: 120px; height: 120px; right: -70px; top: -75px; }
+.compact-mode .add-copy h1 { font-size: 18px; line-height: 1.25; }
+.compact-mode .add-copy > p:last-child { margin-top: 7px; font-size: 11px; line-height: 1.45; }
+.compact-mode .add-form { display: grid; gap: 7px; }
+.compact-mode .input-wrap input { height: 42px; }
+.compact-mode .add-form .button { width: 100%; min-height: 40px; }
+.compact-mode .quick-actions { grid-column: 1; gap: 10px 14px; margin-top: 0; }
+.compact-mode .drop-tip { flex-basis: 100%; margin-left: 0; }
+.compact-mode .content-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+.compact-mode .shelf-card { min-height: 0; padding: 14px 12px; border-radius: 15px; }
+.compact-mode .section-header h2 { font-size: 18px; }
+.compact-mode .section-note { margin: 6px 0 10px; }
+.compact-mode .shelf-item { grid-template-columns: 28px minmax(0, 1fr); gap: 7px; min-height: 58px; padding: 8px 2px; }
+.compact-mode .kind-icon { width: 28px; height: 28px; border-radius: 8px; font-size: 13px; }
+.compact-mode .item-actions { grid-column: 2; justify-self: end; margin-top: -5px; }
+.compact-mode .item-button { width: 30px; height: 30px; }
+.compact-mode .bookmark-actions .item-button:nth-child(2) { display: grid; }
+.compact-mode .empty-state { padding: 30px 14px 24px; }
+.compact-mode footer { padding: 13px 0 17px; }
+.compact-mode .toast { right: 10px; bottom: 10px; max-width: calc(100vw - 20px); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
